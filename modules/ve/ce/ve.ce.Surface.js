@@ -731,10 +731,10 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 		// Figure out range
 		var range = null;
 		if (offsetDiff == 0) {
-			console.log('delete');
+			ve.log('delete');
 			range = new ve.Range( previous.range.start, next.range.start - lengthDiff );
 		} else {
-			console.log('backspace');
+			ve.log('backspace');
 			range = new ve.Range( previous.range.start, next.range.start );
 		}
 
