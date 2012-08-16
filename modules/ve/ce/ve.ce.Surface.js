@@ -666,11 +666,37 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 		fromLeft = 0,
 		fromRight = 0;
 
+	var isSomethingFishy = function() {
+		if ( lengthDiff > 0 ) {
+			// Adding text
+			if (
+				previous.text.substring( 0, previous.range.start - nodeOffset - lengthDiff ) ===
+				next.text.substring( 0, previous.range.start - nodeOffset - lengthDiff ) &&
+				previous.text.substring( previous.range.start - nodeOffset - lengthDiff) ===
+				next.text.substring( next.range.start - nodeOffset - lengthDiff)
+			) {
+				// Leading and trailing chars are the same
+				return false;
+			}
+		} else if ( lengthDiff < 0) {
+			// Removing text
+			if (
+				previous.text.substring( 0, next.range.start - nodeOffset -1 ) ===
+				next.text.substring( 0, next.range.start - nodeOffset - 1 ) &&
+				previous.text.substring( next.range.start - nodeOffset - lengthDiff - 1 ) ===
+				next.text.substring( next.range.start - nodeOffset - 1)
+			) {
+				// Leading and trailing chars are the same
+				return false;
+			}
+		}
+		return true;
+	}
+
 	if (
 		lengthDiff > 0 &&
 		offsetDiff === lengthDiff &&
-		previous.text.substring( 0, previous.range.start - nodeOffset - 1 ) ===
-		next.text.substring( 0, previous.range.start - nodeOffset - 1 )
+		!isSomethingFishy()
 	) {
 		// Something simple was added, figure out what it is and transact.
 		ve.log('!!!!!!!! simple addition !!!!!!!!');
@@ -687,7 +713,6 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 
 		// Prevent re-rendering and transact
 		this.render = false;
-		ve.log('transact 1');
 		this.model.change(
 			ve.dm.Transaction.newFromInsertion(
 				this.documentView.model, previous.range.start, data
@@ -697,25 +722,29 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 		this.render = true;
 
 	} else if (
-		lengthDiff < 0 &&
-		offsetDiff === lengthDiff &&
-		previous.text.substring( 0, next.range.start - nodeOffset - 1 ) ===
-		next.text.substring( 0, next.range.start - nodeOffset - 1 )
+		( offsetDiff == 0 || offsetDiff == lengthDiff ) &&
+		!isSomethingFishy()
 	) {
+		// Something simple was removed
 		ve.log('!!!!!!!! simple deletion !!!!!!!!');
 
+		// Figure out range
+		var range = null;
+		if (offsetDiff == 0) {
+			console.log('delete');
+			range = new ve.Range( previous.range.start, next.range.start - lengthDiff );
+		} else {
+			console.log('backspace');
+			range = new ve.Range( previous.range.start, next.range.start );
+		}
+
+		// Prevent re-rendering and transact
+		this.render = false;
 		this.model.change(
-			ve.dm.Transaction.newFromRemoval(
-				this.documentView.model,
-				new ve.Range(
-					previous.range.start, next.range.start
-				)
-			),
+			ve.dm.Transaction.newFromRemoval( this.documentView.model, range ),
 			next.range
 		);
-
-
-
+		this.render = true;
 
 	} else {
 		ve.log('!!!!!!!! COMPLEX !!!!!!!!');
@@ -768,7 +797,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 	// TODO: Not sure if this is needed
 	setTimeout( ve.proxy( this.pollChanges, this ), 1);
 
-	ve.log('onContentChange');
+	// ve.log('onContentChange');
 };
 
 /**
@@ -779,7 +808,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
  * @param {ve.Range|undefined} selection
  */
 ve.ce.Surface.prototype.onChange = function ( transaction, selection ) {
-	ve.log( 'onChange' );
+	// ve.log( 'onChange' );
 
 	if ( selection ) {
 		this.showSelection( selection );
