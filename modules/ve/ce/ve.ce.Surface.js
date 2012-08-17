@@ -1062,15 +1062,17 @@ ve.ce.Surface.prototype.handleDelete = function ( e, backspace ) {
 				}
 			} );
 
-			// Remove source node or source node ancestor
-			this.model.change( ve.dm.Transaction.newFromRemoval(
-				this.documentView.model, nodeToDelete.getModel().getOuterRange()
-			) );
-			// Append source data to target
 			this.model.change(
-				ve.dm.Transaction.newFromInsertion(
-					this.documentView.model, targetOffset, sourceData
-				),
+				[
+					// Remove source node or source node ancestor
+					ve.dm.Transaction.newFromRemoval(
+						this.documentView.model, nodeToDelete.getModel().getOuterRange()
+					),
+					// Append source data to target
+					ve.dm.Transaction.newFromInsertion(
+						this.documentView.model, targetOffset, sourceData
+					)
+				],
 				new ve.Range( cursorAt )
 			);
 		}
