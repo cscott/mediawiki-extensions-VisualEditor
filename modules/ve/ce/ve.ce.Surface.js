@@ -994,10 +994,38 @@ ve.ce.Surface.prototype.handleDelete = function ( e, backspace ) {
 		// Save target location of cursor
 		cursorAt = targetOffset;
 
+
+		ve.log('targetOffset', targetOffset);
+		ve.log('targetNode', targetNode);
+
+
+		var endOffset = targetNode.model.getOffset() + targetNode.model.getLength() + (targetNode.model.isWrapped() ? 1 : 0);
+
+		ve.log('endOffset', endOffset);
+
+		var remainingData = targetNode.model.doc.data.slice(targetOffset, endOffset);
+		var remainingText = '';
+		for( var i = 0; i < remainingData.length; i++ ) {
+			remainingText += remainingData[i][0];
+		}
+
+		ve.log('remainingText', remainingText);
+
+		var remainingTextAfterMatch = remainingText.match(/[a-zA-Z\-_’'‘ÆÐƎƏƐƔĲŊŒẞÞǷȜæðǝəɛɣĳŋœĸſßþƿȝĄƁÇĐƊĘĦĮƘŁØƠŞȘŢȚŦŲƯY̨Ƴąɓçđɗęħįƙłøơşșţțŧųưy̨ƴÁÀÂÄǍĂĀÃÅǺĄÆǼǢƁĆĊĈČÇĎḌĐƊÐÉÈĖÊËĚĔĒĘẸƎƏƐĠĜǦĞĢƔáàâäǎăāãåǻąæǽǣɓćċĉčçďḍđɗðéèėêëěĕēęẹǝəɛġĝǧğģɣĤḤĦIÍÌİÎÏǏĬĪĨĮỊĲĴĶƘĹĻŁĽĿʼNŃN̈ŇÑŅŊÓÒÔÖǑŎŌÕŐỌØǾƠŒĥḥħıíìiîïǐĭīĩįịĳĵķƙĸĺļłľŀŉńn̈ňñņŋóòôöǒŏōõőọøǿơœŔŘŖŚŜŠŞȘṢẞŤŢṬŦÞÚÙÛÜǓŬŪŨŰŮŲỤƯẂẀŴẄǷÝỲŶŸȲỸƳŹŻŽẒŕřŗſśŝšşșṣßťţṭŧþúùûüǔŭūũűůųụưẃẁŵẅƿýỳŷÿȳỹƴźżžẓ]/g)
+
+		ve.log('remainingTextAfterMatch', remainingTextAfterMatch);
+
+		if(remainingTextAfterMatch !== null && remainingTextAfterMatch.length > 0) {
+			return;
+		}
+
+
 		// If within a node, allow browser to handle delete natively. The poll will catch the change.
+/*
 		if ( sourceOffset != this.model.getDocument().getRelativeContentOffset( sourceNode.model.getOffset(), 1 ) ) {
 			return;
 		}
+*/
 
 		ve.log('handleDelete programatically');
 		e.preventDefault();
