@@ -672,8 +672,8 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 			if (
 				previous.text.substring( 0, previous.range.start - nodeOffset - lengthDiff ) ===
 				next.text.substring( 0, previous.range.start - nodeOffset - lengthDiff ) &&
-				previous.text.substring( previous.range.start - nodeOffset - lengthDiff) ===
-				next.text.substring( next.range.start - nodeOffset - lengthDiff)
+				previous.text.substring( previous.range.start - nodeOffset + lengthDiff) ===
+				next.text.substring( next.range.start - nodeOffset + lengthDiff)
 			) {
 				// Leading and trailing chars are the same
 				return false;
@@ -699,7 +699,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 		!isSomethingFishy()
 	) {
 		// Something simple was added, figure out what it is and transact.
-		ve.log('!!!!!!!! simple addition !!!!!!!!');
+		ve.log('simple addition');
 		data = next.text.substring(
 				previous.range.start - nodeOffset - 1,
 				next.range.start - nodeOffset - 1
@@ -726,7 +726,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 		!isSomethingFishy()
 	) {
 		// Something simple was removed
-		ve.log('!!!!!!!! simple deletion !!!!!!!!');
+		ve.log('simple deletion');
 
 		// Figure out range
 		var range = null;
@@ -747,7 +747,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 		this.render = true;
 
 	} else {
-		ve.log('!!!!!!!! COMPLEX !!!!!!!!');
+		ve.log('complex text change');
 		len = Math.min( previous.text.length, next.text.length );
 
 		// Count same characters from left
