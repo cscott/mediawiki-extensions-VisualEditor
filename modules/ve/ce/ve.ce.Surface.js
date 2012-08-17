@@ -975,9 +975,22 @@ ve.ce.Surface.prototype.handleDelete = function ( e, backspace ) {
 		if ( backspace ) {
 			sourceOffset = selection.to;
 			targetOffset = this.getNearestCorrectOffset( sourceOffset - 1, -1 );
+
+			// At the beginning of the document - don't do anything and preventDefault
+			if ( sourceOffset === targetOffset ) {
+				e.preventDefault();
+				return;
+			}
+
 		} else {
 			sourceOffset = this.model.getDocument().getRelativeContentOffset( selection.to, 1 );
 			targetOffset = selection.to;
+
+			// At the end of the document - don't do anything and preventDefault
+			if ( sourceOffset <= targetOffset ) {
+				e.preventDefault();
+				return;
+			}
 		}
 
 		// Set source and target nodes
