@@ -1000,6 +1000,7 @@ ve.ce.Surface.prototype.handleDelete = function ( e, backspace ) {
 		}
 
 		ve.log('handleDelete programatically');
+		e.preventDefault();
 		this.stopPolling();
 
 		if (
