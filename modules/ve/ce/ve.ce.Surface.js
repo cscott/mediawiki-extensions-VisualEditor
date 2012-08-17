@@ -995,27 +995,25 @@ ve.ce.Surface.prototype.handleDelete = function ( e, backspace ) {
 		cursorAt = targetOffset;
 
 
-		ve.log('targetOffset', targetOffset);
-		ve.log('targetNode', targetNode);
+		// Get text from cursor location to end of node in the proper direction
+		var adjacentData = null,
+			adjacentText = '';
 
-
-		var endOffset = targetNode.model.getOffset() + targetNode.model.getLength() + (targetNode.model.isWrapped() ? 1 : 0);
-
-		ve.log('endOffset', endOffset);
-
-		var remainingData = targetNode.model.doc.data.slice(targetOffset, endOffset);
-		var remainingText = '';
-		for( var i = 0; i < remainingData.length; i++ ) {
-			remainingText += remainingData[i][0];
+		if (backspace) {
+			adjacentData = sourceNode.model.doc.data.slice( sourceNode.model.getOffset() + ( sourceNode.model.isWrapped() ? 1 : 0) , sourceOffset );
+		} else {
+			var endOffset = targetNode.model.getOffset() + targetNode.model.getLength() + ( targetNode.model.isWrapped() ? 1 : 0 );
+			adjacentData = targetNode.model.doc.data.slice( targetOffset, endOffset );
 		}
 
-		ve.log('remainingText', remainingText);
+		for( var i = 0; i < adjacentData.length; i++ ) {
+			adjacentText += adjacentData[i][0];
+		}
 
-		var remainingTextAfterMatch = remainingText.match(/[a-zA-Z\-_’'‘ÆÐƎƏƐƔĲŊŒẞÞǷȜæðǝəɛɣĳŋœĸſßþƿȝĄƁÇĐƊĘĦĮƘŁØƠŞȘŢȚŦŲƯY̨Ƴąɓçđɗęħįƙłøơşșţțŧųưy̨ƴÁÀÂÄǍĂĀÃÅǺĄÆǼǢƁĆĊĈČÇĎḌĐƊÐÉÈĖÊËĚĔĒĘẸƎƏƐĠĜǦĞĢƔáàâäǎăāãåǻąæǽǣɓćċĉčçďḍđɗðéèėêëěĕēęẹǝəɛġĝǧğģɣĤḤĦIÍÌİÎÏǏĬĪĨĮỊĲĴĶƘĹĻŁĽĿʼNŃN̈ŇÑŅŊÓÒÔÖǑŎŌÕŐỌØǾƠŒĥḥħıíìiîïǐĭīĩįịĳĵķƙĸĺļłľŀŉńn̈ňñņŋóòôöǒŏōõőọøǿơœŔŘŖŚŜŠŞȘṢẞŤŢṬŦÞÚÙÛÜǓŬŪŨŰŮŲỤƯẂẀŴẄǷÝỲŶŸȲỸƳŹŻŽẒŕřŗſśŝšşșṣßťţṭŧþúùûüǔŭūũűůųụưẃẁŵẅƿýỳŷÿȳỹƴźżžẓ]/g)
+		var adjacentTextAfterMatch = adjacentText.match(/[a-zA-Z\-_’'‘ÆÐƎƏƐƔĲŊŒẞÞǷȜæðǝəɛɣĳŋœĸſßþƿȝĄƁÇĐƊĘĦĮƘŁØƠŞȘŢȚŦŲƯY̨Ƴąɓçđɗęħįƙłøơşșţțŧųưy̨ƴÁÀÂÄǍĂĀÃÅǺĄÆǼǢƁĆĊĈČÇĎḌĐƊÐÉÈĖÊËĚĔĒĘẸƎƏƐĠĜǦĞĢƔáàâäǎăāãåǻąæǽǣɓćċĉčçďḍđɗðéèėêëěĕēęẹǝəɛġĝǧğģɣĤḤĦIÍÌİÎÏǏĬĪĨĮỊĲĴĶƘĹĻŁĽĿʼNŃN̈ŇÑŅŊÓÒÔÖǑŎŌÕŐỌØǾƠŒĥḥħıíìiîïǐĭīĩįịĳĵķƙĸĺļłľŀŉńn̈ňñņŋóòôöǒŏōõőọøǿơœŔŘŖŚŜŠŞȘṢẞŤŢṬŦÞÚÙÛÜǓŬŪŨŰŮŲỤƯẂẀŴẄǷÝỲŶŸȲỸƳŹŻŽẒŕřŗſśŝšşșṣßťţṭŧþúùûüǔŭūũűůųụưẃẁŵẅƿýỳŷÿȳỹƴźżžẓ]/g);
 
-		ve.log('remainingTextAfterMatch', remainingTextAfterMatch);
-
-		if(remainingTextAfterMatch !== null && remainingTextAfterMatch.length > 0) {
+		// If there are "normal" characters in the adjacent text, let the browser handle natively.
+		if( adjacentTextAfterMatch !== null && adjacentTextAfterMatch.length > 0 ) {
 			return;
 		}
 
@@ -1049,9 +1047,10 @@ ve.ce.Surface.prototype.handleDelete = function ( e, backspace ) {
 			// Source is a slug - move the cursor somewhere useful
 			this.model.change( null, new ve.Range( cursorAt ) );
 		} else {
-			// Source and target are different nodes and do not share a parent, perform tricky merge
+			// Source and target are different nodes or do not share a parent, perform tricky merge
 			// Get the data for the source node
 			sourceData = this.documentView.model.getData( sourceNode.model.getRange() );
+			ve.log(sourceData);
 			// Find the node that should be completely removed
 			nodeToDelete = sourceNode;
 			ve.Node.traverseUpstream( nodeToDelete, function ( node ) {
@@ -1062,6 +1061,7 @@ ve.ce.Surface.prototype.handleDelete = function ( e, backspace ) {
 					return false;
 				}
 			} );
+
 			// Remove source node or source node ancestor
 			this.model.change( ve.dm.Transaction.newFromRemoval(
 				this.documentView.model, nodeToDelete.getModel().getOuterRange()
