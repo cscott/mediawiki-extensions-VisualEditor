@@ -884,6 +884,11 @@ ve.ce.Surface.prototype.handleEnter = function ( e ) {
 				documentModel, contentBranchModel.getOuterRange().to, emptyParagraph
 			);
 		}
+	} else if ( e.shiftKey ) {
+		tx = ve.dm.Transaction.newFromInsertion(
+			documentModel, cursor, [{ 'type': 'break' }, { 'type': '/break' }]
+		);
+		this.model.change( tx );
 	} else {
 		// Split
 		ve.Node.traverseUpstream( node, function ( node ) {
