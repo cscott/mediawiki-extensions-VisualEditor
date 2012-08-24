@@ -18,6 +18,8 @@ ve.ce.Surface = function ( $container, model ) {
 	// Inheritance
 	ve.EventEmitter.call( this );
 
+	this.fishyNode = false;
+
 	// Properties
 	this.model = model;
 	this.documentView = null; // See initialization below
@@ -467,6 +469,8 @@ ve.ce.Surface.prototype.onKeyPress = function ( e ) {
 		node.$.empty();
 		// TODO: Can this be chained to the above line?
 		node.$.append( document.createTextNode( '' ) );
+		this.fishyNode = node;
+
 		this.clearPollData();
 		this.startPolling();
 	}
@@ -655,6 +659,10 @@ ve.ce.Surface.prototype.pollChanges = function ( async ) {
  * @param {Object} next.range New selection
  */
 ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
+	if(this.fishyNode) {
+		this.fishyNode.children[0].$ = $( this.fishyNode.$.contents()[0] );
+		this.fishyNode = false;
+	}
 	var data, annotations, len,
 		nodeOffset = $( node ).data( 'node' ).model.getOffset(),
 		offsetDiff = (
