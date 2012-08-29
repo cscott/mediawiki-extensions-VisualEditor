@@ -47,6 +47,7 @@ ve.dm.Document = function ( data, parentDocument ) {
 		currentNode = this.documentNode;
 	this.documentNode.setDocument( doc );
 	this.documentNode.setRoot( root );
+	this.preAnnotations = {};
 	for ( i = 0, length = this.data.length; i < length; i++ ) {
 		// Infer that if an item in the linear model has a type attribute than it must be an element
 		if ( this.data[i].type === undefined ) {
@@ -502,9 +503,9 @@ ve.dm.Document.prototype.getAnnotationsFromOffset = function ( offset ) {
 		this.data[offset][1] : this.data[offset].annotations;
 
 	if ( ve.isPlainObject( annotations ) ) {
-		return ve.extendObject( {}, annotations );
+		return ve.extendObject( annotations, this.preAnnotations );
 	}
-	return {};
+	return this.preAnnotations;
 };
 
 /**
@@ -711,6 +712,24 @@ ve.dm.Document.prototype.getAnnotationsFromRange = function ( range, all ) {
 	}
 	return left;
 };
+
+ve.dm.Document.prototype.setPreAnnotations = function ( annotation ) {
+
+	this.preAnnotations[JSON.stringify(annotation)] = annotation;
+
+	//ve.log( 'setPreAnnotations', annotations );
+	//ve.log(ve.extendObject( this.preAnnotations, annotation ));
+
+};
+
+ve.dm.Document.prototype.getPreAnnotations = function () {
+	return this.preAnnotations;
+}
+
+ve.dm.Document.prototype.clearPreAnnotations = function () {
+	this.preAnnotations = {};
+}
+
 
 /**
  * Returns ve.Range free of outer whitespace.

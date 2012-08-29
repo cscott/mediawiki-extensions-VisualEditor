@@ -16,7 +16,7 @@
 ve.ce.TextNode = function ( model ) {
 	// Inheritance
 	ve.ce.LeafNode.call( this, 'text', model, $( document.createTextNode('') ) );
-	
+
 	// Events
 	this.model.addListenerMethod( this, 'update', 'onUpdate' );
 
@@ -162,12 +162,12 @@ ve.ce.TextNode.prototype.onUpdate = function ( force ) {
 		this.$ = $new;
 		if ( this.parent ) {
 			this.parent.clean();
-			if ( ve.debug ) {
+//			if ( ve.debug ) {
 				this.parent.$.css( 'backgroundColor', '#F6F6F6' );
 				setTimeout( ve.bind( function () {
 					this.parent.$.css( 'backgroundColor', 'transparent' );
 				}, this ), 350 );
-			}
+//			}
 		}
 	}
 };
@@ -267,7 +267,7 @@ ve.ce.TextNode.prototype.getHtml = function () {
 		right = data[i];
 		leftPlain = typeof left === 'string';
 		rightPlain = typeof right === 'string';
-		
+
 		if ( !leftPlain && rightPlain ) {
 			// [formatted][plain]
 			close = {};

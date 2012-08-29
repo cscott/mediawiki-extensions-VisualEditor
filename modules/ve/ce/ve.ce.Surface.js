@@ -165,6 +165,9 @@ ve.ce.Surface.prototype.onKeyDown = function ( e ) {
 		newOffset,
 		annotations,
 		annotation;
+
+	this.handlePreAnnotations();
+
 	switch ( e.keyCode ) {
 		// Tab Key
 		case 9:
@@ -302,6 +305,31 @@ ve.ce.Surface.prototype.onKeyDown = function ( e ) {
 				this.poll.polling = true;
 				this.pollChanges();
 			}
+	}
+};
+
+ve.ce.Surface.prototype.handlePreAnnotations = function () {
+	var selection = this.model.getSelection();
+
+	if ( !ve.isEmptyObject( this.model.documentModel.getPreAnnotations() ) && selection.getLength() === 0 ) {
+		ve.log('doing the trick');
+		ve.log(this.model.documentModel.preAnnotations);
+		this.model.change(
+			ve.dm.Transaction.newFromInsertion(
+				this.documentView.model,
+				selection.start,
+				[['Z', this.model.documentModel.preAnnotations]]
+			),
+			new ve.Range( selection.start, selection.start + 1 )
+		);
+/*
+		var tx = ve.dm.Transaction.newFromInsertion(
+			this.documentView.model,
+			selection.start,
+			['Z', this.model.documentModel.preAnnotations]
+		);
+		ve.dm.TransactionProcessor.commit(this.documentView.model, tx);
+*/
 	}
 };
 
@@ -720,7 +748,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 			),
 			next.range
 		);
-		this.render = true;
+		//this.render = true;
 
 	} else if (
 		( offsetDiff == 0 || offsetDiff == lengthDiff ) &&
@@ -749,6 +777,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 
 	} else {
 		ve.log('complex text change');
+		this.render = false;
 		len = Math.min( previous.text.length, next.text.length );
 
 		// Count same characters from left
@@ -799,6 +828,7 @@ ve.ce.Surface.prototype.onContentChange = function ( node, previous, next ) {
 	// TODO: Not sure if this is needed
 	setTimeout( ve.bind( this.pollChanges, this ), 1);
 
+
 	// ve.log('onContentChange');
 };
 
@@ -832,6 +862,8 @@ ve.ce.Surface.prototype.onChange = function ( transaction, selection ) {
 			250
 		);
 	}
+
+	this.model.documentModel.clearPreAnnotations();
 };
 
 /**

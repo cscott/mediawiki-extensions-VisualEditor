@@ -131,6 +131,9 @@ ve.dm.Surface.prototype.annotate = function ( method, annotation ) {
 			this.getDocument(), selection, method, annotation
 		);
 		this.change( tx, selection );
+	} else {
+		ve.log('fuck', annotation);
+		this.documentModel.setPreAnnotations( annotation );
 	}
 };
 
