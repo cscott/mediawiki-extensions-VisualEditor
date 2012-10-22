@@ -509,4 +509,6 @@ QUnit.test( 'setProp', function ( assert ) {
 	assert.deepEqual( 'f', obj.a.b.c.d.e, 'setting new keys with depth 5' );
 	ve.setProp( obj, 'bar', 'baz', 'whee', 'wheee', 'wheeee' );
 	assert.deepEqual( null, obj.bar.baz, 'descending into null fails silently' );
+	ve.setProp( obj, 'foo', 'bar', 'baz', 5 );
+	assert.deepEqual( undefined, obj.foo.bar, 'descending into a non-object fails silently' );
 } );
