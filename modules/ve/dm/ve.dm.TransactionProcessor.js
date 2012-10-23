@@ -174,6 +174,7 @@ ve.dm.TransactionProcessor.processors.attribute = function ( op ) {
 		op.key,
 		from, to
 	);
+	this.setChangeMarker( this.cursor, 'attributes' );
 };
 
 /**
@@ -196,7 +197,7 @@ ve.dm.TransactionProcessor.processors.attribute = function ( op ) {
  * @param {Array} op.insert Linear model data to insert
  */
 ve.dm.TransactionProcessor.processors.replace = function ( op ) {
-	var node, selection, range,
+	var node, selection, range, parentOffset,
 		remove = this.reversed ? op.insert : op.remove,
 		insert = this.reversed ? op.remove : op.insert,
 		removeIsContent = ve.dm.Document.isContentData( remove ),
@@ -252,6 +253,13 @@ ve.dm.TransactionProcessor.processors.replace = function ( op ) {
 					range.end + this.adjustment + insert.length - remove.length )
 			);
 		}
+		// Set change markers on the parents of the affected nodes
+		for ( i = 0; i < selection.length; i++ ) {
+			this.setChangeMarker(
+				selection[i].parentOuterRange.start + this.adjustment,
+				'content'
+			);
+		}
 		// Advance the cursor
 		this.cursor += insert.length;
 		this.adjustment += insert.length - remove.length;
@@ -283,6 +291,37 @@ ve.dm.TransactionProcessor.processors.replace = function ( op ) {
 					), 'siblings' );
 					for ( i = 0; i < selection.length; i++ ) {
 						affectedRanges.push( selection[i].nodeOuterRange );
+						if ( selection[i].nodeOuterRange.start >=
+							prevCursor - this.adjustment
+						) {
+							// The opening element was removed, so this
+							// node will either be removed or merged
+							// into another node. Mark its parent.
+							// HACK detect parent==document
+							parentOffset = selection[i].parentOuterRange &&
+								selection[i].node.getParent().getType() !== 'document' ?
+								selection[i].parentOuterRange.start + this.adjustment :
+								-1;
+							this.setChangeMarker( parentOffset, 'childrenRemoved' );
+						} else {
+							// The opening element survives, so this
+							// node will have some of its content or
+							// children removed and/or have another
+							// node merged into it. Mark the node.
+							// HACK detect special case where closing is replaced
+							// TODO mark accurately for merge
+							// TODO mark partially removed children
+							// (can be structure or content!)
+							// HACK detect parent==document
+							parentOffset = selection[i].node.getType() !== 'document' ?
+								selection[i].nodeOuterRange.start + this.adjustment :
+								-1;
+							this.setChangeMarker( parentOffset,
+								selection[i].node.canContainContent() ?
+									'content' :
+									'childrenRemoved'
+							);
+						}
 					}
 				}
 				// Walk through the remove and insert data
@@ -322,11 +361,18 @@ ve.dm.TransactionProcessor.processors.replace = function ( op ) {
 								affectedRanges.push( new ve.Range( scopeStart, scopeEnd ) );
 								// Update scope
 								scope = scope.getParent() || scope;
+								// Set change marker
+								this.transaction.setChangeMarker(
+									scopeStart + this.adjustment,
+									'rebuilt'
+								);
 							}
 
 						} else {
 							// Opening element
 							insertLevel++;
+							// Mark as 'new'
+							this.setChangeMarker( prevCursor + i, 'new' );
 						}
 					}
 				}
@@ -396,6 +442,14 @@ ve.dm.TransactionProcessor.prototype.executeOperation = function ( op ) {
  */
 ve.dm.TransactionProcessor.prototype.process = function () {
 	var op;
+	if ( this.reversed ) {
+		// Undo change markers before rolling back the transaction, because the offsets
+		// are relevant to the post-commit state
+		this.applyChangeMarkers();
+		// Unset the change markers we've just undone
+		this.transaction.clearChangeMarkers();
+	}
+
 	// This loop is factored this way to allow operations to be skipped over or executed
 	// from within other operations
 	this.operationIndex = 0;
@@ -403,6 +457,12 @@ ve.dm.TransactionProcessor.prototype.process = function () {
 		this.executeOperation( op );
 	}
 	this.synchronizer.synchronize();
+
+	if ( !this.reversed ) {
+		// Apply the change markers we've accumulated while processing the transaction
+		this.applyChangeMarkers();
+	}
+	// Mark the transaction as committed or rolled back, as appropriate
 	this.transaction.toggleApplied();
 };
 
@@ -417,7 +477,7 @@ ve.dm.TransactionProcessor.prototype.process = function () {
  * @throws 'Invalid transaction, annotation to be cleared is not set'
  */
 ve.dm.TransactionProcessor.prototype.applyAnnotations = function ( to ) {
-	var item, element, annotated, annotations, i;
+	var item, element, annotated, annotations, i, range, selection, offset;
 	if ( this.set.isEmpty() && this.clear.isEmpty() ) {
 		return;
 	}
@@ -464,5 +524,58 @@ ve.dm.TransactionProcessor.prototype.applyAnnotations = function ( to ) {
 			}
 		}
 	}
-	this.synchronizer.pushAnnotation( new ve.Range( this.cursor, to ) );
+	if ( this.cursor < to ) {
+		range = new ve.Range( this.cursor, to );
+		selection = this.document.selectNodes(
+			new ve.Range(
+				this.cursor - this.adjustment,
+				to - this.adjustment
+			),
+			'leaves'
+		);
+		for ( i = 0; i < selection.length; i++ ) {
+			offset = selection[i].node.isWrapped() ?
+				selection[i].nodeOuterRange.start :
+				selection[i].parentOuterRange.start;
+			this.setChangeMarker( offset + this.adjustment, 'annotations' );
+		}
+		this.synchronizer.pushAnnotation( new ve.Range( this.cursor, to ) );
+	}
+};
+
+// TODO document me
+ve.dm.TransactionProcessor.prototype.setChangeMarker = function ( offset, type, increment ) {
+	// Refuse to set any new change markers while reversing transactions
+	if ( !this.reversed ) {
+		this.transaction.setChangeMarker( offset, type, increment );
+	}
+}
+
+// TODO document me
+ve.dm.TransactionProcessor.prototype.applyChangeMarkers = function () {
+	var offset, type, previousValue, newValue, element,
+		markers = this.transaction.getChangeMarkers(),
+		m = this.reversed ? -1 : 1;
+	for ( offset in markers ) {
+		for ( type in markers[offset] ) {
+			offset = Number( offset );
+			element = offset === -1 ? this.document.data : this.document.data[offset];
+			previousValue = ve.getProp( element, 'internal', 'changed', type );
+			newValue = ( previousValue || 0 ) + m*markers[offset][type];
+			if ( newValue != 0 ) {
+				ve.setProp( element, 'internal', 'changed', type, newValue );
+			} else if ( previousValue !== undefined ) {
+				// Value was set but becomes zero, delete the key
+				delete element.internal.changed[type];
+				// If that made .changed empty, delete it
+				if ( ve.isEmptyObject( element.internal.changed ) ) {
+					delete element.internal.changed;
+				}
+				// If that made .internal empty, delete it
+				if ( ve.isEmptyObject( element.internal ) ) {
+					delete element.internal;
+				}
+			}
+		}
+	}
 };

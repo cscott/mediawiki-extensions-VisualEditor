@@ -73,6 +73,7 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 				data[1] = ['a', new ve.AnnotationSet( [ bold ] )];
 				data[2] = ['b', new ve.AnnotationSet( [ bold ] )];
 				data[3] = ['c', new ve.AnnotationSet( [ bold, underline ] )];
+				ve.setProp( data[0], 'internal', 'changed', 'annotations', 2 );
 			}
 		},
 		'annotating content and leaf elements': {
@@ -85,6 +86,8 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			'expected': function ( data ) {
 				data[38] = ['h', new ve.AnnotationSet( [ bold ] )];
 				data[39].annotations = new ve.AnnotationSet( [ bold ] );
+				ve.setProp( data[37], 'internal', 'changed', 'annotations', 1 );
+				ve.setProp( data[39], 'internal', 'changed', 'annotations', 1 );
 			}
 		},
 		'using an annotation method other than set or clear throws an exception': {
@@ -144,6 +147,9 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 				data[12].attributes.style = 'number';
 				data[12].attributes.test = 'abcd';
 				delete data[39].attributes['html/src'];
+				ve.setProp( data[0], 'internal', 'changed', 'attributes', 1 );
+				ve.setProp( data[12], 'internal', 'changed', 'attributes', 2 );
+				ve.setProp( data[39], 'internal', 'changed', 'attributes', 1 );
 			}
 		},
 		'changing attributes on non-element data throws an exception': {
@@ -160,6 +166,7 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			],
 			'expected': function ( data ) {
 				data.splice( 1, 0, 'F', 'O', 'O' );
+				ve.setProp( data[0], 'internal', 'changed', 'content', 1 );
 			}
 		},
 		'removing text': {
@@ -169,6 +176,7 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			],
 			'expected': function ( data ) {
 				data.splice( 1, 1 );
+				ve.setProp( data[0], 'internal', 'changed', 'content', 1 );
 			}
 		},
 		'replacing text': {
@@ -178,6 +186,7 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			],
 			'expected': function ( data ) {
 				data.splice( 1, 1, 'F', 'O', 'O' );
+				ve.setProp( data[0], 'internal', 'changed', 'content', 1 );
 			}
 		},
 		'inserting mixed content': {
@@ -187,6 +196,7 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			],
 			'expected': function ( data ) {
 				data.splice( 1, 1, 'F', 'O', 'O', {'type':'image'}, {'type':'/image'}, 'B', 'A', 'R' );
+				ve.setProp( data[0], 'internal', 'changed', 'content', 1 );
 			}
 		},
 		'converting an element': {
@@ -203,6 +213,9 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 				data[0].type = 'paragraph';
 				delete data[0].attributes;
 				data[4].type = '/paragraph';
+				ve.setProp( data[0], 'internal', 'changed', 'new', 1 );
+				// HACK assert document change marker
+				ve.setProp( data, 'internal', 'changed', 'childrenRemoved', 1 );
 			}
 		},
 		'splitting an element': {
@@ -221,6 +234,8 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 					{ 'type': '/heading' },
 					{ 'type': 'heading', 'attributes': { 'level': 1 } }
 				);
+				ve.setProp( data[0], 'internal', 'changed', 'rebuilt', 1 );
+				ve.setProp( data[3], 'internal', 'changed', 'new', 1 );
 			}
 		},
 		'merging an element': {
@@ -234,6 +249,9 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			],
 			'expected': function ( data ) {
 				data.splice( 57, 2 );
+				ve.setProp( data[55], 'internal', 'changed', 'content', 1 );
+				// HACK assert document change marker
+				ve.setProp( data, 'internal', 'changed', 'childrenRemoved', 1 );
 			}
 		},
 		'stripping elements': {
@@ -254,6 +272,8 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			'expected': function ( data ) {
 				data.splice( 10, 1 );
 				data.splice( 3, 1 );
+				ve.setProp( data[0], 'internal', 'changed', 'content', 1 );
+				ve.setProp( data[8], 'internal', 'changed', 'content', 1 );
 			}
 		}
 	};
@@ -281,9 +301,13 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			expectedData = ve.copyArray( originalData );
 			cases[msg].expected( expectedData );
 			expectedDocument = new ve.dm.Document( expectedData );
+			// HACK document change markers
+			expectedDocument.internal = expectedData.internal;
+			delete expectedData.internal;
 			// Commit
 			ve.dm.TransactionProcessor.commit( testDocument, tx );
 			assert.deepEqual( testDocument.getData(), expectedData, 'commit (data): ' + msg );
+			assert.deepEqual( testDocument.internal, expectedData.internal, 'commit (document change markers): ' + msg );
 			assert.equalNodeTree(
 				testDocument.getDocumentNode(),
 				expectedDocument.getDocumentNode(),
@@ -292,6 +316,7 @@ QUnit.test( 'commit/rollback', function ( assert ) {
 			// Rollback
 			ve.dm.TransactionProcessor.rollback( testDocument, tx );
 			assert.deepEqual( testDocument.getData(), ve.dm.example.data, 'rollback (data): ' + msg );
+			assert.deepEqual( testDocument.internal, originalDoc.internal, 'rollback (document change markers): ' + msg );
 			assert.equalNodeTree(
 				testDocument.getDocumentNode(),
 				originalDoc.getDocumentNode(),
