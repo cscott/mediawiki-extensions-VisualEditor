@@ -60,3 +60,19 @@ QUnit.test( 'getDomFromData', function ( assert ) {
 		);
 	}
 } );
+
+QUnit.test( 'change markers on document', function ( assert ) {
+	var data = [
+			{ 'type': 'paragraph', 'internal': { 'changed': { 'new': 1 } } },
+			'a',
+			{ 'type': '/paragraph' }
+		],
+		expectedHtml = '<div data-ve-changed="{&quot;childrenRemoved&quot;:1}">' +
+			'<p data-ve-changed="{&quot;new&quot;:1}">a</p></div>';
+	data.internal = { 'changed': { 'childrenRemoved': 1 } };
+	assert.equalDomElement(
+		ve.dm.converter.getDomFromData( data ),
+		$( expectedHtml )[0],
+		'change markers on document node are propagated to wrapping <div>'
+	);
+} );

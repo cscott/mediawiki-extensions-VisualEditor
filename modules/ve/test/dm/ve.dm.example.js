@@ -1382,5 +1382,25 @@ ve.dm.example.domToDataCases = {
 			},
 			{ 'type': '/metaBlock' }
 		]
+	},
+	'change markers': {
+		'html': null,
+		'data': [
+			{ 'type': 'paragraph', 'internal': { 'changed': { 'content': 1 } } },
+			'F',
+			'o',
+			'o',
+			{ 'type': 'image', 'internal': { 'changed': { 'attributes': 2 } } },
+			{ 'type': '/image' },
+			{ 'type': '/paragraph' },
+			{ 'type': 'paragraph', 'internal': { 'changed': { 'new': 1 } } },
+			'B',
+			'a',
+			'r',
+			{ 'type': '/paragraph' }
+		],
+		'normalizedHtml': '<p data-ve-changed="{&quot;content&quot;:1}">' +
+				'Foo<img data-ve-changed="{&quot;attributes&quot;:2}" />' +
+				'</p><p data-ve-changed="{&quot;new&quot;:1}">Bar</p>'
 	}
 };

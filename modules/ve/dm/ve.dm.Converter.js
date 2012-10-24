@@ -120,6 +120,15 @@ ve.dm.Converter.prototype.getDomElementFromDataElement = function ( dataElement 
 			}
 		}
 	}
+	// Change markers
+	if (
+		dataElement.internal && dataElement.internal.changed &&
+		!ve.isEmptyObject( dataElement.internal.changed )
+	) {
+		domElement.setAttribute( 'data-ve-changed',
+			JSON.stringify( dataElement.internal.changed )
+		);
+	}
 	return domElement;
 };
 
@@ -856,6 +865,10 @@ ve.dm.Converter.prototype.getDomFromData = function ( data ) {
 			container.appendChild( document.createTextNode( container.lastOuterPost ) );
 		}
 		delete container.lastOuterPost;
+	}
+	// Change markers for the document node
+	if ( data.internal && data.internal.changed && !ve.isEmptyObject( data.internal.changed ) ) {
+		container.setAttribute( 'data-ve-changed', JSON.stringify( data.internal.changed ) );
 	}
 	return container;
 };
