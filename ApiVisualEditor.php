@@ -57,7 +57,7 @@ class ApiVisualEditor extends ApiBase {
 			// API Posts HTML to Parsoid Service, receives Wikitext,
 			// API Saves Wikitext to page.
 			$wikitext = Http::post(
-				$parsoid . '/' . $page->getPrefixedDBkey(),
+				$parsoid . $wgVisualEditorParsoidPrefix . '/' . $page->getPrefixedDBkey(),
 				array( 'postData' => array( 'content' => $params['html'] ) )
 			);
 
