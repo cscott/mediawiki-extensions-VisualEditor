@@ -38,7 +38,8 @@
 	width: 100%;
 	background-color: transparent !important;
 	background-image: -webkit-gradient(linear,0% 0%,0% 100%,color-stop(65%,rgba(0,0,0,.1)));
-	-webkit-user-select: auto;
+	/*-webkit-user-select: auto;*/
+	display: none;
 }
 
 /* Fix weird Chrome native selection involving floated elements */
