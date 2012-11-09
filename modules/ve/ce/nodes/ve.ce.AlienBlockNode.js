@@ -17,6 +17,10 @@ ve.ce.AlienBlockNode = function VeCeAlienBlockNode( model ) {
 	// Parent constructor
 	ve.ce.LeafNode.call( this, 'alienBlock', model );
 
+	// DOM Changes
+	this.$.addClass( 've-ce-alienBlockNode' );
+	this.$.attr( 'contenteditable', false );
+
 	// Events
 	this.model.addListenerMethod( this, 'update', 'onUpdate' );
 
@@ -44,14 +48,10 @@ ve.ce.AlienBlockNode.rules = {
 /* Methods */
 
 ve.ce.AlienBlockNode.prototype.onUpdate = function () {
-	var $new = $( this.model.getAttribute( 'html' ) );
-	this.$.replaceWith( $new );
-	this.$ = $new;
-	this.$.addClass( 've-ce-alienBlockNode' );
-	this.$.attr( 'contenteditable', false );
-	this.$.add(this.$.contents()).each(function() {
+	this.$.html( this.model.getAttribute( 'html' ) );
+	this.$.add(this.$.find('*')).each(function() {
 		if ( this.nodeType == Node.ELEMENT_NODE ) {
-			if ( $(this).css('float') == 'none' && !$(this).hasClass('ve-ce-alienBlockNode') ) {
+			if ( !$(this).css('float') && !$(this).hasClass('ve-ce-alienBlockNode') ) {
 				return;
 			}
 			$(this).append('<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="shield">');
