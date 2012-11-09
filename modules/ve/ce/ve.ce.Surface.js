@@ -36,6 +36,11 @@ ve.ce.Surface = function VeCeSurface( $container, model, surface ) {
 	this.dragging = false;
 	this.selecting = false;
 
+	//this.$.css( 'position', 'relative' );
+	this.$selectionWrapper = $( '<div id="#selectionWrapper"></div>' ).appendTo( document.body );
+	this.$selectionWrapper.css('opacity', '.5');
+	//this.$.append( this.$selectionWrapper );
+
 	// Events
 
 	this.surfaceObserver.addListenerMethods(
@@ -1233,4 +1238,35 @@ ve.ce.Surface.prototype.unlock = function () {
  */
 ve.ce.Surface.prototype.isLocked = function () {
 	return this.locked;
+};
+
+
+ve.ce.Surface.prototype.drawFakeSelection = function( range ) {
+	var nodes = this.documentView.selectNodes( range, 'leaves' /* default anyway */ );
+	var aliens = [];
+	for( var i = 0; i < nodes.length; i++ ) {
+		if ( nodes[i].node.type === 'alienBlock' ) {
+			aliens.push( nodes[i].node );
+		}
+	}
+	var elements = [];
+	for( var i = 0; i < aliens.length; i++ ) {
+		elements.push( aliens[i].$ );
+		aliens[i].$.find( '*' ).each( function() {
+			elements.push( $( this ) );
+		} );
+	}
+	this.$selectionWrapper.empty();
+	for( var i = 0; i < elements.length; i++ ) {
+		var $item = $( '<div></div>' );
+		$item.width( elements[i].width() );
+		$item.height( elements[i].height() );
+		$item.css('top', elements[i].offset().top );
+		$item.css('left', elements[i].offset().left );
+		$item.css( {
+			'position': 'absolute',
+			'background-color': '#69aafa'
+		});
+		this.$selectionWrapper.append( $item );
+	}
 };
