@@ -54,7 +54,7 @@ ve.ce.AlienBlockNode.prototype.onUpdate = function () {
 			if ( $(this).css('float') == 'none' && !$(this).hasClass('ve-ce-alienBlockNode') ) {
 				return;
 			}
-			$(this).append('<img src="http://upload.wikimedia.org/wikipedia/commons/c/ce/Transparent.gif" class="shield">');
+			$(this).append('<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="shield">');
 		}
 	});
 };

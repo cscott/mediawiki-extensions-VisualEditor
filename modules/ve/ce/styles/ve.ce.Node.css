@@ -11,7 +11,7 @@
 .ve-ce-alienInlineNode,
 .ve-ce-alienBlockNode *,
 .ve-ce-alienInlineNode * {
-	/*background-color: #FFFFBA !important;*/
+	background-color: #FFFFBA !important;
 	position: relative !important;
 	top: 0 !important;
 	left: 0 !important;
@@ -37,7 +37,6 @@
 	height: 100%;
 	width: 100%;
 	background-color: transparent !important;
-	background-image: -webkit-gradient(linear,0% 0%,0% 100%,color-stop(65%,rgba(0,0,0,.1)));
 	-webkit-user-select: auto;
 }
 
@@ -47,13 +46,11 @@
 	content: '';
 }
 
-.ve-ce-alienBlockNode,
-.ve-ce-metaBlockNode {
+.ve-ce-alienBlockNode {
 	display: block;
 }
 
-.ve-ce-alienInlineNode,
-.ve-ce-metaInlineNode {
+.ve-ce-alienInlineNode {
 	display: inline;
 }
 
