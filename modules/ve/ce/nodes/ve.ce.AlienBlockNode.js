@@ -17,10 +17,6 @@ ve.ce.AlienBlockNode = function VeCeAlienBlockNode( model ) {
 	// Parent constructor
 	ve.ce.LeafNode.call( this, 'alienBlock', model );
 
-	// DOM Changes
-	this.$.addClass( 've-ce-alienBlockNode' );
-	this.$.attr( 'contenteditable', false );
-
 	// Events
 	this.model.addListenerMethod( this, 'update', 'onUpdate' );
 
@@ -48,8 +44,19 @@ ve.ce.AlienBlockNode.rules = {
 /* Methods */
 
 ve.ce.AlienBlockNode.prototype.onUpdate = function () {
-	// TODO preventDefault on click for links inside, user should not leave the page
-	this.$.html( this.model.getAttribute( 'html' ) );
+	var $new = $( this.model.getAttribute( 'html' ) );
+	this.$.replaceWith( $new );
+	this.$ = $new;
+	this.$.addClass( 've-ce-alienBlockNode' );
+	this.$.attr( 'contenteditable', false );
+	this.$.add(this.$.contents()).each(function() {
+		if ( this.nodeType == Node.ELEMENT_NODE ) {
+			if ( $(this).css('float') == 'none' && !$(this).hasClass('ve-ce-alienBlockNode') ) {
+				return;
+			}
+			$(this).append('<img src="http://upload.wikimedia.org/wikipedia/commons/c/ce/Transparent.gif" class="shield">');
+		}
+	});
 };
 
 /* Registration */
