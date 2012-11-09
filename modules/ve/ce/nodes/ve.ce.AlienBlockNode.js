@@ -49,7 +49,6 @@ ve.ce.AlienBlockNode.prototype.onUpdate = function () {
 	this.$ = $new;
 	this.$.addClass( 've-ce-alienBlockNode' );
 	this.$.attr( 'contenteditable', false );
-	return;
 	this.$.add(this.$.contents()).each(function() {
 		if ( this.nodeType == Node.ELEMENT_NODE ) {
 			if ( $(this).css('float') == 'none' && !$(this).hasClass('ve-ce-alienBlockNode') ) {
