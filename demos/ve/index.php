@@ -142,6 +142,7 @@ $html = file_get_contents( $page );
 		<script src="../../modules/ve/dm/ve.dm.MetaList.js"></script>
 		<script src="../../modules/ve/dm/ve.dm.TransactionProcessor.js"></script>
 		<script src="../../modules/ve/dm/ve.dm.Transaction.js"></script>
+		<script src="../../modules/ve/dm/ve.dm.Transaction.transpose.js"></script>
 		<script src="../../modules/ve/dm/ve.dm.Surface.js"></script>
 		<script src="../../modules/ve/dm/ve.dm.SurfaceFragment.js"></script>
 		<script src="../../modules/ve/dm/ve.dm.DataString.js"></script>

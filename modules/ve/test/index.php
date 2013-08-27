@@ -87,6 +87,7 @@
 		<script src="../../ve/dm/ve.dm.MetaList.js"></script>
 		<script src="../../ve/dm/ve.dm.TransactionProcessor.js"></script>
 		<script src="../../ve/dm/ve.dm.Transaction.js"></script>
+		<script src="../../ve/dm/ve.dm.Transaction.transpose.js"></script>
 		<script src="../../ve/dm/ve.dm.Surface.js"></script>
 		<script src="../../ve/dm/ve.dm.SurfaceFragment.js"></script>
 		<script src="../../ve/dm/ve.dm.DataString.js"></script>
@@ -277,6 +278,7 @@
 		<script src="dm/ve.dm.InternalList.test.js"></script>
 		<script src="dm/ve.dm.LinearData.test.js"></script>
 		<script src="dm/ve.dm.Transaction.test.js"></script>
+		<script src="dm/ve.dm.Transaction.transpose.test.js"></script>
 		<script src="dm/ve.dm.TransactionProcessor.test.js"></script>
 		<script src="dm/ve.dm.Surface.test.js"></script>
 		<script src="dm/ve.dm.SurfaceFragment.test.js"></script>

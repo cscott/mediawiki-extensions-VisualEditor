@@ -288,6 +288,7 @@ $wgResourceModules += array(
 			've/dm/ve.dm.MetaList.js',
 			've/dm/ve.dm.TransactionProcessor.js',
 			've/dm/ve.dm.Transaction.js',
+			've/dm/ve.dm.Transaction.transpose.js',
 			've/dm/ve.dm.Surface.js',
 			've/dm/ve.dm.SurfaceFragment.js',
 			've/dm/ve.dm.DataString.js',
