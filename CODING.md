@@ -40,8 +40,10 @@ You can also run a subset of the tests in your web browser.  Set:
 $wgEnableJavaScriptTest = true;
 ```
 in your mediawiki install's `LocalSettings.php` file, then visit
-http://URL-OF-YOUR-MEDIAWIKI-INSTALL/index.php/Special:JavaScriptTest/qunit
-(for example, http://localhost/mediawiki/index.php/Special:JavaScriptTest/quint).
+`http://URL_OF_YOUR_MEDIAWIKI_INSTALL/index.php/Special:JavaScriptTest/qunit`
+(for example, http://127.0.01/mediawiki/index.php/Special:JavaScriptTest/quint).
+
+[](http://localhost/foo)
 
 ## Building documentation
 
@@ -83,8 +85,8 @@ if you're using a symlink).
 
 The generated documentation is in the `docs/` subdirectory.  View the
 documentation at
-http://URL-OF-YOUR-MEDIAWIKI-INSTALL/extensions/VisualEditor/docs/
-(for example, http://localhost/mediawiki/extensions/VisualEditor/docs).
+`http://URL_OF_YOUR_MEDIAWIKI_INSTALL/extensions/VisualEditor/docs/`
+(for example, http://127.0.0.1/mediawiki/extensions/VisualEditor/docs).
 Note that `jsduck` doesn't support browsing vis the `file:` protocol.
 
 ## VisualEditor Code Guidelines
