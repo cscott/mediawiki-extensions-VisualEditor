@@ -10,7 +10,7 @@ QUnit.module( 've.dm.Transaction.transpose' );
 /* Helper methods */
 
 // Don't enable certain tests, since transpose doesn't (yet) support metadata
-var disableMetadataTests = true;
+var disableMetadataTests = false;
 
 /* Tests */
 
